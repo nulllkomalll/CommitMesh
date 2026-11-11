@@ -1,0 +1,61 @@
+:root {
+  /* Brand */
+  --color-navy: #003087;
+  --color-navy-dark: #00226b;
+  --color-primary: #0070e0;
+  --color-primary-hover: #005bb8;
+  --color-primary-soft: #e8f1fc;
+  --color-yellow: #ffc439;
+  --color-yellow-soft: #fff6dc;
+  --color-yellow-ink: #6b4e00;
+
+  /* Surfaces */
+  --color-bg: #f5f7fa;
+  --color-surface: #ffffff;
+  --color-surface-alt: #f9fafc;
+  --color-border: #e1e6ee;
+  --color-border-strong: #cdd5e0;
+
+  /* Text */
+  --color-text: #14213a;
+  --color-text-muted: #5d6b82;
+  --color-text-faint: #8794a9;
+
+  /* Semantic */
+  --color-success: #0b7a3e;
+  --color-success-soft: #e5f4ec;
+  --color-danger: #c4261d;
+  --color-danger-soft: #fdecea;
+  --color-warning: #8a5a00;
+  --color-warning-soft: #fff4d6;
+  --color-neutral: #5d6b82;
+  --color-neutral-soft: #eef1f6;
+
+  /* Shape & depth */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --shadow-card: 0 1px 2px rgba(16, 32, 64, 0.04), 0 1px 3px rgba(16, 32, 64, 0.04);
+  --shadow-pop: 0 8px 24px rgba(16, 32, 64, 0.12);
+
+  /* Type */
+  --font-sans: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+
+  /* Layout */
+  --sidebar-w: 248px;
+  --topbar-h: 64px;
+  --content-pad: 32px;
+}
+
+@media (max-width: 1023px) {
+  :root {
+    --sidebar-w: 72px;
+    --content-pad: 24px;
+  }
+}
+
+@media (max-width: 767px) {
+  :root {
+    --content-pad: 16px;
+  }
+}
