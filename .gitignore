@@ -1,5 +1,12 @@
-node_modules
-dist
+﻿# Dependencies and build output
+node_modules/
+dist/
+
+# Local files
+*.local
+.DS_Store
+
+# Environment files and secrets
 .env
 .env.*
 !.env.example
