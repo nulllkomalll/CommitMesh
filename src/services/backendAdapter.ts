@@ -22,7 +22,9 @@ import { runConflictSimulation as runLocalSimulation } from './simulation';
 import { computeSummary } from './budget';
 import { ApiError } from '../utils/errors';
 
-const API_BASE_URL = 'http://localhost:4000/api';
+const API_BASE_URL = (
+  import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api'
+).replace(/\/+$/, '');
 const PLAN_STORAGE_KEY = 'commitmesh.backend.planId.v1';
 
 type ApiAgent = 'TRAVEL' | 'SHOPPING' | 'EVENTS';
