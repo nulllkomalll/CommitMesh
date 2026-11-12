@@ -26,6 +26,11 @@ export interface CommitMeshApi {
   requestReservation(proposalId: string): Promise<Snapshot>;
   /** Ask the backend to release (or withdraw) a proposal. */
   requestRelease(proposalId: string): Promise<Snapshot>;
+    /** Create or reuse a PayPal Sandbox order for a reserved proposal. */
+  createPayPalOrder(proposalId: string): Promise<{ approvalUrl: string }>;
+
+  /** Capture a buyer-approved PayPal order and return the updated snapshot. */
+  capturePayPalPayment(commitmentId: string): Promise<Snapshot>;
   analyzePlan(): Promise<AnalysisResult>;
   runConflictSimulation(input: SimulationInput): Promise<SimulationResult>;
   resetDemoData(): Promise<Snapshot>;

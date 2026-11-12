@@ -197,6 +197,26 @@ export class MockAdapter implements CommitMeshApi {
     return this.commit();
   }
 
+    /* ---------- PayPal ---------- */
+
+  async createPayPalOrder(
+    _proposalId: string,
+  ): Promise<{ approvalUrl: string }> {
+    await wait();
+    throw new ApiError(
+      'PayPal Sandbox checkout requires the backend adapter.',
+    );
+  }
+
+  async capturePayPalPayment(
+    _commitmentId: string,
+  ): Promise<Snapshot> {
+    await wait();
+    throw new ApiError(
+      'PayPal Sandbox payment capture requires the backend adapter.',
+    );
+  }
+
   /* ---------- analysis & simulation ---------- */
 
   async analyzePlan(): Promise<AnalysisResult> {

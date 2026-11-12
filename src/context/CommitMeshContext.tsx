@@ -1,3 +1,4 @@
+
 import {
   createContext,
   useCallback,
@@ -21,8 +22,12 @@ interface CommitMeshContextValue {
   pending: string | null;
   actionError: string | null;
   dismissActionError: () => void;
-  /** Runs a service call that resolves with a new snapshot. Resolves true on success. */
+
+  /** Runs a service call that resolves with a new snapshot. */
   run: (key: string, action: () => Promise<Snapshot>) => Promise<boolean>;
+
+  /** Starts PayPal Sandbox checkout for a reserved proposal. */
+  startPayPalCheckout: (proposalId: string) => Promise<void>;
 
   analysis: AnalysisResult | null;
   analysisStale: boolean;
@@ -49,6 +54,7 @@ export function CommitMeshProvider({ children }: { children: ReactNode }) {
   const reload = useCallback(async () => {
     setLoading(true);
     setLoadError(null);
+
     try {
       setSnapshot(await api.getSnapshot());
     } catch (error) {
@@ -62,17 +68,34 @@ export function CommitMeshProvider({ children }: { children: ReactNode }) {
     void reload();
   }, [reload]);
 
-  const run = useCallback(async (key: string, action: () => Promise<Snapshot>) => {
-    setPending(key);
+  const run = useCallback(
+    async (key: string, action: () => Promise<Snapshot>) => {
+      setPending(key);
+      setActionError(null);
+
+      try {
+        setSnapshot(await action());
+        setAnalysisStale(true);
+        return true;
+      } catch (error) {
+        setActionError(messageOf(error));
+        return false;
+      } finally {
+        setPending(null);
+      }
+    },
+    [],
+  );
+
+  const startPayPalCheckout = useCallback(async (proposalId: string) => {
+    setPending(`paypal:${proposalId}`);
     setActionError(null);
+
     try {
-      setSnapshot(await action());
-      setAnalysisStale(true);
-      return true;
+      const { approvalUrl } = await api.createPayPalOrder(proposalId);
+      window.location.assign(approvalUrl);
     } catch (error) {
       setActionError(messageOf(error));
-      return false;
-    } finally {
       setPending(null);
     }
   }, []);
@@ -80,6 +103,7 @@ export function CommitMeshProvider({ children }: { children: ReactNode }) {
   const analyzePlan = useCallback(async () => {
     setAnalyzing(true);
     setAnalysisError(null);
+
     try {
       setAnalysis(await api.analyzePlan());
       setAnalysisStale(false);
@@ -102,6 +126,7 @@ export function CommitMeshProvider({ children }: { children: ReactNode }) {
       actionError,
       dismissActionError,
       run,
+      startPayPalCheckout,
       analysis,
       analysisStale,
       analyzing,
@@ -117,6 +142,7 @@ export function CommitMeshProvider({ children }: { children: ReactNode }) {
       actionError,
       dismissActionError,
       run,
+      startPayPalCheckout,
       analysis,
       analysisStale,
       analyzing,
@@ -125,18 +151,30 @@ export function CommitMeshProvider({ children }: { children: ReactNode }) {
     ],
   );
 
-  return <CommitMeshContext.Provider value={value}>{children}</CommitMeshContext.Provider>;
+  return (
+    <CommitMeshContext.Provider value={value}>
+      {children}
+    </CommitMeshContext.Provider>
+  );
 }
 
 export function useCommitMesh(): CommitMeshContextValue {
   const ctx = useContext(CommitMeshContext);
-  if (!ctx) throw new Error('useCommitMesh must be used inside <CommitMeshProvider>');
+
+  if (!ctx) {
+    throw new Error('useCommitMesh must be used inside <CommitMeshProvider>');
+  }
+
   return ctx;
 }
 
 /** For pages that only render once data has loaded. */
 export function useSnapshot(): Snapshot {
   const { snapshot } = useCommitMesh();
-  if (!snapshot) throw new Error('Snapshot not loaded');
+
+  if (!snapshot) {
+    throw new Error('Snapshot not loaded');
+  }
+
   return snapshot;
 }

@@ -18,7 +18,6 @@ import type {
   UpdateBudgetInput,
 } from '../types';
 
-import { analyzePlan as runLocalAnalysis } from './analysis';
 import { runConflictSimulation as runLocalSimulation } from './simulation';
 import { computeSummary } from './budget';
 import { ApiError } from '../utils/errors';
@@ -95,7 +94,7 @@ const ledgerTypeFromApi: Record<string, LedgerEventType> = {
 };
 
 const DEFAULT_PLAN: CreatePlanInput = {
-  name: 'Lisbon Offsite â€” Shared Budget',
+  name: 'Lisbon Offsite Ã¢â‚¬â€ Shared Budget',
   currency: 'USD',
   totalBudget: 900,
   agentPriorities: {
@@ -109,7 +108,7 @@ const DEFAULT_PROPOSALS: SubmitProposalInput[] = [
   {
     agentId: 'travel',
     merchant: 'SkyJet Airlines',
-    description: 'Round-trip flights for 4 â€” Lisbon team offsite',
+    description: 'Round-trip flights for 4 Ã¢â‚¬â€ Lisbon team offsite',
     amount: 700,
     priority: 'high',
   },
@@ -410,15 +409,54 @@ export class BackendAdapter implements CommitMeshApi {
     return this.loadSnapshot(planId);
   }
 
-  async analyzePlan(): Promise<AnalysisResult> {
-    const snapshot = await this.getSnapshot();
+    async createPayPalOrder(
+    proposalId: string,
+  ): Promise<{ approvalUrl: string }> {
+    const planId = await this.getOrCreatePlanId();
 
-    return runLocalAnalysis(
-      snapshot.plan,
-      snapshot.agents,
-      snapshot.proposals,
-      snapshot.summary,
+    const result = await request<{ entries: BackendLedgerEntry[] }>(
+      `/plans/${planId}/ledger`,
     );
+
+    const reservation = result.entries.find(
+      (entry) =>
+        entry.proposalId === proposalId &&
+        entry.type === 'RESERVATION' &&
+        entry.commitmentId,
+    );
+
+    if (!reservation?.commitmentId) {
+      throw new ApiError(
+        'Could not find an active reservation for this proposal.',
+      );
+    }
+
+    return request<{ approvalUrl: string }>(
+      `/commitments/${reservation.commitmentId}/paypal/order`,
+      { method: 'POST' },
+    );
+  }
+
+  async capturePayPalPayment(commitmentId: string): Promise<Snapshot> {
+    const planId = await this.getOrCreatePlanId();
+
+    await request(
+      `/commitments/${commitmentId}/paypal/capture`,
+      { method: 'POST' },
+    );
+
+    return this.loadSnapshot(planId);
+  }
+
+  async analyzePlan(): Promise<AnalysisResult> {
+    const planId = await this.getOrCreatePlanId();
+
+    const result = await request<{ analysis: AnalysisResult }>(
+      `/plans/${planId}/analyze`,
+      { method: 'POST' },
+    );
+
+    return result.analysis;
   }
 
   async runConflictSimulation(

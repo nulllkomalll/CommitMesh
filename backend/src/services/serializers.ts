@@ -34,7 +34,12 @@ export const commitmentDto = (c: CommitmentDoc) => ({
   proposalId: String(c.proposalId),
   amountCents: c.amountCents,
   status: c.status,
+  paymentStatus: c.paymentStatus ?? 'NONE',
+  paypalOrderId: c.paypalOrderId ?? null,
+  paypalApprovalUrl: c.paypalApprovalUrl ?? null,
+  paypalCaptureId: c.paypalCaptureId ?? null,
   releasedAt: c.releasedAt ?? null,
+  paidAt: c.paidAt ?? null,
   createdAt: c.createdAt,
   updatedAt: c.updatedAt,
 });

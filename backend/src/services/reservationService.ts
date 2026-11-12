@@ -104,7 +104,14 @@ export async function releaseCommitment(commitmentId: string) {
 
     await session.withTransaction(async () => {
       const commitment = await Commitment.findOneAndUpdate(
-        { _id: commitmentId, status: 'RESERVED' },
+        {
+  _id: commitmentId,
+  status: 'RESERVED',
+  $or: [
+    { paymentStatus: 'NONE' },
+    { paymentStatus: { $exists: false } },
+  ],
+},
         { $set: { status: 'RELEASED', releasedAt: new Date() } },
         { new: true, session },
       ).lean<CommitmentDoc>();

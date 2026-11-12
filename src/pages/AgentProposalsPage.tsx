@@ -1,3 +1,4 @@
+
 import { AgentCard } from '../components/AgentCard';
 import { AnalysisPanel } from '../components/AnalysisPanel';
 import { Card } from '../components/Card';
@@ -12,25 +13,35 @@ import { formatMoney } from '../utils/format';
 
 export function AgentProposalsPage() {
   const { plan, agents, proposals, summary } = useSnapshot();
+
   const {
     run,
     pending,
     actionError,
     dismissActionError,
+    startPayPalCheckout,
     analysis,
     analysisStale,
     analyzing,
     analysisError,
     analyzePlan,
   } = useCommitMesh();
+
   const page = NAV_ITEMS[2];
 
-  const submit = (input: SubmitProposalInput) => run('submit', () => api.submitProposal(input));
+  const submit = (input: SubmitProposalInput) =>
+    run('submit', () => api.submitProposal(input));
 
   return (
     <>
       <PageHeader title={page.title} subtitle={page.subtitle} />
-      {actionError && <ErrorBanner message={actionError} onDismiss={dismissActionError} />}
+
+      {actionError && (
+        <ErrorBanner
+          message={actionError}
+          onDismiss={dismissActionError}
+        />
+      )}
 
       {summary.overBy > 0 && (
         <InfoBanner tone="warning">
@@ -56,7 +67,7 @@ export function AgentProposalsPage() {
 
       <Card
         title="Submitted proposals"
-        subtitle="Reserve and release buttons send requests; the backend decides the outcome."
+        subtitle="Reserve funds, release commitments, or complete an approved PayPal Sandbox payment."
         flush
       >
         <ProposalTable
@@ -64,8 +75,13 @@ export function AgentProposalsPage() {
           agents={agents}
           currency={summary.currency}
           pending={pending}
-          onReserve={(id) => void run(`reserve:${id}`, () => api.requestReservation(id))}
-          onRelease={(id) => void run(`release:${id}`, () => api.requestRelease(id))}
+          onReserve={(id) =>
+            void run(`reserve:${id}`, () => api.requestReservation(id))
+          }
+          onRelease={(id) =>
+            void run(`release:${id}`, () => api.requestRelease(id))
+          }
+          onPay={(id) => void startPayPalCheckout(id)}
         />
       </Card>
 
