@@ -8,6 +8,12 @@ CommitMesh is a multi-agent financial coordination platform that helps independe
 
 PayPal Sandbox provides a buyer-approved checkout and payment-capture integration.
 
+## Live Demo
+
+- **Frontend:** https://commitmesh-frontend.onrender.com
+- **Backend Health:** https://commitmesh.onrender.com/api/health
+- **Hosting:** Render
+
 ## The Problem
 
 Independent AI agents can make individually reasonable purchasing decisions while collectively exceeding a shared budget.
